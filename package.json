@@ -3,5 +3,8 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "nodemailer": "^7.0.4"
+  },
+  "scripts": {
+  "start": "node server.js"
   }
 }

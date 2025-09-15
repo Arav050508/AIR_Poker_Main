@@ -7,42 +7,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// serve static frontend
+// ✅ Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// fallback route to index.html
+// ✅ Fallback: always return index.html (for root and unknown routes)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'app_index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Use your Gmail and App Password
+// ---- EMAIL ROUTE (leave this as-is) ----
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'aravgandhi20@gmail.com', // <-- Replace with your Gmail address
-    pass: 'gaaqpqfdaoiwkihp'      // <-- Replace with your Gmail App Password
+    user: process.env.EMAIL_USER, // move to env variables!
+    pass: process.env.EMAIL_PASS
   }
 });
 
 app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
-
   try {
     const info = await transporter.sendMail({
-      from: 'aravgandhi20@gmail.com',
-      to: 'aravgandhi20@gmail.com',
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
       subject: `Contact Us: Message from ${name} <${email}>`,
       text: `Message from: ${name} <${email}>\n\n${message}`,
       replyTo: email
     });
-
-    console.log("Message sent:", info.messageId);
     res.json({ success: true, info });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ success: false, error: error.toString() });
   }
 });
 
-const PORT = 3001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
