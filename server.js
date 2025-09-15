@@ -8,19 +8,19 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files from /public
-app.use(express.static(path.resolve('./public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes for each HTML page
 app.get('/', (req, res) => {
-  res.sendFile(path.resolve('./public/app_index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'app_index.html'));
 });
 
 app.get('/poker', (req, res) => {
-  res.sendFile(path.resolve('./public/poker_index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'poker_index.html'));
 });
 
 app.get('/journal', (req, res) => {
-  res.sendFile(path.resolve('./public/journal.html'));
+  res.sendFile(path.join(__dirname, 'public', 'journal.html'));
 });
 
 // ---- EMAIL ROUTE ----
