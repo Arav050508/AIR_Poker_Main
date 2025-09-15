@@ -2743,7 +2743,7 @@ const firebaseConfig = {
           showAchievementNotification(['first-journal']);
       }
   }
-
+  
   // Manual trigger to test journal achievement (for testing)
   window.testJournalAchievement = function() {
       console.log('=== TESTING JOURNAL ACHIEVEMENT ===');
