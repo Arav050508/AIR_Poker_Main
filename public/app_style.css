@@ -1347,6 +1347,113 @@ input:hover {
   color: #222;
 }
 
+/* === Achievement Notification Styles === */
+.achievement-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: 2px solid #ffb300;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 
+      0 8px 32px rgba(255, 215, 0, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  transform: translateX(400px);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 320px;
+  min-width: 280px;
+}
+
+.achievement-notification.show {
+  transform: translateX(0);
+}
+
+.achievement-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.achievement-notification-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  animation: achievementGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes achievementGlow {
+  from {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+  }
+  to {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 16px rgba(255, 215, 0, 0.8));
+  }
+}
+
+.achievement-notification-text {
+  flex: 1;
+}
+
+.achievement-notification-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.achievement-notification-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.achievement-notification-desc {
+  font-size: 0.85rem;
+  color: #333;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+/* Animation for multiple notifications */
+.achievement-notification:nth-child(2) {
+  top: 100px;
+}
+
+.achievement-notification:nth-child(3) {
+  top: 180px;
+}
+
+.achievement-notification:nth-child(4) {
+  top: 260px;
+}
+
+/* Responsive design for achievement notifications */
+@media (max-width: 768px) {
+  .achievement-notification {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    min-width: auto;
+  }
+  
+  .achievement-notification:nth-child(2) {
+    top: 90px;
+  }
+  
+  .achievement-notification:nth-child(3) {
+    top: 160px;
+  }
+  
+  .achievement-notification:nth-child(4) {
+    top: 230px;
+  }
+}
+
 /* === Enhanced Achievement Category Progress Bars === */
 .category-progress {
   margin-bottom: 22px;

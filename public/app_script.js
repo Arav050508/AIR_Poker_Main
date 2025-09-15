@@ -81,9 +81,18 @@ const firebaseConfig = {
   }
   
   // Update updateUserStatsUI to use getCurrentUserId
-  function updateUserStatsUI() {
+  function updateUserStatsUI(statType, increment = 0) {
     const userId = getCurrentUserId();
     if (!userId) return;
+    
+    // Handle different stat types
+    if (statType === 'handsPlayed') {
+      const currentHands = parseInt(localStorage.getItem(`handsPlayed_${userId}`) || '0', 10);
+      const newHands = currentHands + increment;
+      localStorage.setItem(`handsPlayed_${userId}`, newHands);
+      console.log(`[STATS] Updated hands played: ${newHands}`);
+    }
+    
     // Chips
     const chips = localStorage.getItem(`pokerChips_${userId}`) || '1000';
     const chipsBox = document.getElementById('user-chips');

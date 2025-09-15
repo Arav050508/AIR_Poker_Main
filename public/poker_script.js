@@ -1673,10 +1673,9 @@ function nextRound() {
     roundStage = 1;
     
     // Increment hands played if user did not fold pre-flop
-    
-    // if (typeof incrementHandsPlayed === 'function' && !playerStates[3].folded) {
-    //   incrementHandsPlayed();
-    // }
+    if (typeof incrementHandsPlayed === 'function' && !playerStates[3].folded) {
+      incrementHandsPlayed();
+    }
   } else if (roundStage === 1) {
     // Deal the turn
     communityCards.push(deck.pop());
@@ -1784,9 +1783,8 @@ function handleFold(playerIndex) {
         userLossRecorded = true;
       }
       
-      // Add activity record for folding
+      // Add activity record for folding (this also updates profile stats)
       addRecentActivity("You folded", 'loss');
-      updateProfileStats('loss');
       
       // ACHIEVEMENT TRACKING - Track folding for user
       if (typeof trackFold === 'function') {
@@ -3420,6 +3418,9 @@ function awardPotToPlayer(playerIdx, reason) {
       saveChipsToLocalStorage();
     }
     
+    // Check if any players need chip refresh (including user reaching 0 chips)
+    ensureMinimumChips(20);
+    
     // If the winner is the user (player 3), update their chips in the database
     if (playerIdx === 3 && typeof updateChipsAfterHand === 'function') {
       if (typeof window !== 'undefined' && window.updateChipsAfterHand) {
@@ -3435,9 +3436,8 @@ function awardPotToPlayer(playerIdx, reason) {
     
     // Log activity for wins
     if (playerIdx === 3) {
-      // User won - log win activity
+      // User won - log win activity (this also updates profile stats)
       addRecentActivity(`You won $${totalPot}`, 'win');
-      updateProfileStats('win');
       
       // ACHIEVEMENT TRACKING - Track hand completion for user
       if (typeof trackHandCompletion === 'function') {
@@ -4138,6 +4138,61 @@ function ensureMinimumChips(minimumAmount = 20) {
         console.log(`[GAME] AI Player ${playerIndex} had 0 chips. Resetting to 500.`);
         chips[i] = 500;
         playersGivenChips++;
+      } else if (i === 3 && chips[i] === 0) {
+        // User (player 4) reached 0 chips - refresh to 500 and update profile
+        console.log(`[GAME] User had 0 chips. Refreshing to 500 and updating profile.`);
+        chips[i] = 500;
+        playersGivenChips++;
+        
+        // Update user's chips in localStorage
+        const userId = getUserIdFromURL ? getUserIdFromURL() : null;
+        if (userId) {
+          localStorage.setItem(`pokerChips_${userId}`, JSON.stringify(chips));
+          console.log(`[PROFILE] Updated user chips in localStorage to 500`);
+        }
+        
+        // Update user's chips in database if available
+        if (typeof updateChipsAfterHand === 'function') {
+          try {
+            updateChipsAfterHand(500); // Add 500 chips
+            console.log(`[PROFILE] Updated user chips in database (+500)`);
+          } catch (dbError) {
+            console.warn(`[PROFILE] Could not update database chips:`, dbError);
+          }
+        }
+        
+        // Log activity for chip refresh
+        if (typeof addRecentActivity === 'function') {
+          addRecentActivity("Chips refreshed to 500", 'account');
+        }
+        
+      } else if (i === 3 && chips[i] < minimumAmount) {
+        // User (player 4) needs chips - give them 500, not just minimumAmount
+        console.log(`[GAME] User needs chips - has $${chips[i]}, refreshing to 500`);
+        chips[i] = 500;
+        playersGivenChips++;
+        
+        // Update user's chips in localStorage
+        const userId = getUserIdFromURL ? getUserIdFromURL() : null;
+        if (userId) {
+          localStorage.setItem(`pokerChips_${userId}`, JSON.stringify(chips));
+          console.log(`[PROFILE] Updated user chips in localStorage to 500`);
+        }
+        
+        // Update user's chips in database if available
+        if (typeof updateChipsAfterHand === 'function') {
+          try {
+            updateChipsAfterHand(500 - chips[i]); // Add the difference
+            console.log(`[PROFILE] Updated user chips in database (+${500 - chips[i]})`);
+          } catch (dbError) {
+            console.warn(`[PROFILE] Could not update database chips:`, dbError);
+          }
+        }
+        
+        // Log activity for chip refresh
+        if (typeof addRecentActivity === 'function') {
+          addRecentActivity("Chips refreshed to 500", 'account');
+        }
       } else if (chips[i] < minimumAmount) {
         console.log(`[GAME] Player ${playerIndex} needs chips - has $${chips[i]}, giving $${minimumAmount - chips[i]} more`);
         chips[i] = minimumAmount;
@@ -4192,6 +4247,16 @@ function ensureMinimumChips(minimumAmount = 20) {
     if (playersGivenChips > 0) {
       console.log(`[GAME] Gave minimum chips to ${playersGivenChips} players`);
       updateChipsAndBets();
+      
+      // Update betting slider if user's chips were refreshed
+      if (typeof window.updateBettingSlider === 'function') {
+        try {
+          window.updateBettingSlider();
+          console.log(`[SLIDER] Updated betting slider after chip refresh`);
+        } catch (sliderError) {
+          console.warn(`[SLIDER] Could not update betting slider:`, sliderError);
+        }
+      }
     }
     
     return playersGivenChips;
@@ -9493,6 +9558,22 @@ function trackBetting(amount) {
 function trackHandCompletion(isWin, handType = null, wasRiverWin = false) {
     achievementTracking.totalHandsPlayed++;
     
+    // Sync with localStorage for stats display
+    const userId = getUserIdFromURL ? getUserIdFromURL() : null;
+    if (userId) {
+        const currentHands = parseInt(localStorage.getItem(`handsPlayed_${userId}`) || '0', 10);
+        localStorage.setItem(`handsPlayed_${userId}`, currentHands + 1);
+        
+        if (isWin) {
+            // Don't increment wins or streak here - they're already tracked by updateProfileStats
+            // The incrementWins() function handles both wins and streak
+        } else {
+            // Don't increment losses here - they're already tracked by updateProfileStats
+            // Just reset the streak
+            localStorage.setItem(`consecutiveWins_${userId}`, '0');
+        }
+    }
+    
     if (isWin) {
         achievementTracking.totalWins++;
         achievementTracking.consecutiveWins++;
@@ -9931,8 +10012,8 @@ window.testAchievementTracking = function() {
     console.log('Current tracking data:', achievementTracking);
     console.log('Current progress:', getAchievementProgress());
     
-    // Test notification
-    showAchievementNotification('test', 'Test Achievement', 'This is a test notification');
+    // Test notification removed to prevent random popups
+    // showAchievementNotification('test', 'Test Achievement', 'This is a test notification');
     
     console.log('[ACHIEVEMENT] Test complete');
 };
