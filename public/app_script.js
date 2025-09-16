@@ -414,6 +414,48 @@ const firebaseConfig = {
           });
   });
   
+  // ====================
+  // ENTER KEY FUNCTIONALITY
+  // ====================
+  
+  // Add Enter key functionality for login form
+  document.getElementById('login-email').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          document.getElementById('login-button').click();
+      }
+  });
+  
+  document.getElementById('login-password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          document.getElementById('login-button').click();
+      }
+  });
+  
+  // Add Enter key functionality for registration form
+  document.getElementById('register-username').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          document.getElementById('register-button').click();
+      }
+  });
+  
+  document.getElementById('register-email').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          document.getElementById('register-button').click();
+      }
+  });
+  
+  document.getElementById('register-password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          document.getElementById('register-button').click();
+      }
+  });
+  
+  document.getElementById('register-confirm-password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+          document.getElementById('register-button').click();
+      }
+  });
+  
   // Logout user
   document.getElementById('logout-button').addEventListener('click', function() {
       // First add logout activity to localStorage for recent activity panel
